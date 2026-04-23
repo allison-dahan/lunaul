@@ -31,16 +31,13 @@
   {% section 'announcement-bar' %}
   {% section 'header' %}
 
-  <!-- CART VEIL + DRAWER -->
-  <div class="cart-veil" id="cartVeil"></div>
-  {% render 'cart-drawer' %}
-
-  <!-- MOBILE NAV -->
-  {% render 'mobile-nav' %}
-
-  <main id="main">{{ content_for_layout }}</main>
-
-  {% section 'footer' %}
+  <div id="page-push">
+    <div class="cart-veil" id="cartVeil"></div>
+    {% render 'cart-drawer' %}
+    {% render 'mobile-nav' %}
+    <main id="main" role="main">{{ content_for_layout }}</main>
+    {% section 'footer' %}
+  </div>
 
   {{ 'theme.js' | asset_url | script_tag }}
 </body>

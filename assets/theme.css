@@ -35,7 +35,7 @@ html { font-size: 13px; -webkit-font-smoothing: antialiased; }
   --mid-grey: #999;
   --dark-grey: #333;
   --border: #e5e5e5;       /* icyto uses very light borders */
-  --header-h: 60px;
+  --header-h: 72px;
 }
 
 body { font-family: var(--f); background: #fff; color: #000; }
@@ -78,8 +78,8 @@ ul   { list-style: none; }
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 24px;
-  gap: 32px;
+  padding: 0 24px 6px;
+  position: relative;
 }
 
 /* Left nav */
@@ -88,13 +88,15 @@ ul   { list-style: none; }
   justify-content: flex-start;
 }
 
-/* Logo — left */
+/* Logo — centered absolutely */
 .header__logo {
-  display: flex; align-items: center; justify-content: flex-start;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 400;
   letter-spacing: 0.3em; text-transform: uppercase;
   white-space: nowrap;
-  flex: 0 0 auto;
 }
 .header__logo img { height: 32px; width: auto; object-fit: contain; }
 

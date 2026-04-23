@@ -57,11 +57,7 @@
 </header>
 
 <!-- SIDEBAR NAV (mobile) -->
-<div class="sidebar-veil" id="sidebarVeil"></div>
 <nav class="sidebar-nav" id="sidebarNav" aria-label="Mobile navigation">
-  <div class="sidebar-nav__head">
-    <button class="sidebar-nav__close" id="sidebarClose">&#215;</button>
-  </div>
   <ul class="sidebar-nav__links">
     {% for link in linklists[section.settings.menu].links %}
       <li>
@@ -112,74 +108,87 @@
 }
 
 /* ── SIDEBAR ── */
-.sidebar-veil {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.3);
-  z-index: 700;
+#page-push {
+  transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
 }
-.sidebar-veil.open { display: block; }
+#page-push.pushed {
+  transform: translateX(260px);
+}
+.site-header {
+  transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+body.sidebar-open .site-header {
+  transform: translateX(260px);
+}
 
 .sidebar-nav {
   position: fixed;
   top: 0; left: 0; bottom: 0;
-  width: 280px;
+  width: 260px;
   background: #fff;
   z-index: 800;
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
   display: flex; flex-direction: column;
-  padding: 0;
   overflow-y: auto;
+  border-right: none;
 }
 .sidebar-nav.open { transform: translateX(0); }
 
-.sidebar-nav__head {
-  display: flex; align-items: center; justify-content: flex-end;
-  padding: 14px 20px;
-  border-bottom: 1px solid #e5e5e5;
-}
-.sidebar-nav__close {
-  background: none; border: none; cursor: pointer;
-  font-size: 22px; line-height: 1; color: #000;
-}
-
 .sidebar-nav__links {
-  list-style: none; padding: 0; margin: 0;
-  display: flex; flex-direction: column;
+  list-style: none; padding: 32px 0 0; margin: 0;
+  display: flex; flex-direction: column; gap: 4px;
   flex: 1;
 }
+
 .sidebar-nav__link {
   display: block;
-  padding: 16px 24px;
-  font-size: 13px; font-weight: 400;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: #000; border-bottom: 1px solid #f0f0f0;
+  padding: 8px 28px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #000;
+  border: none;
   transition: opacity 0.2s;
 }
-.sidebar-nav__link:hover { opacity: 0.5; }
+.sidebar-nav__link:hover { opacity: 0.45; }
+
+li:has(.sidebar-nav__sub) > .sidebar-nav__link::after {
+  content: ' ▶';
+  font-size: 6px;
+  vertical-align: middle;
+  color: #bbb;
+  margin-left: 6px;
+}
 
 .sidebar-nav__sub {
   list-style: none; padding: 0; margin: 0;
-  background: #fafafa;
 }
 .sidebar-nav__sub li a {
-  display: block; padding: 10px 24px 10px 36px;
-  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #888; border-bottom: 1px solid #f0f0f0;
+  display: block;
+  padding: 6px 28px 6px 40px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #aaa;
+  border: none;
   transition: color 0.2s;
 }
 .sidebar-nav__sub li a:hover { color: #000; }
 
 .sidebar-nav__foot {
-  padding: 20px 24px;
-  border-top: 1px solid #e5e5e5;
-  display: flex; flex-direction: column; gap: 12px;
+  padding: 24px 28px;
+  border-top: none;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .sidebar-nav__foot a,
 .sidebar-nav__foot button {
-  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #999; background: none; border: none;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #bbb;
+  background: none; border: none;
   cursor: pointer; font-family: inherit; text-align: left;
   transition: color 0.2s;
 }
@@ -191,24 +200,20 @@
 (function () {
   const menuBtn     = document.getElementById('menuBtn');
   const sidebarNav  = document.getElementById('sidebarNav');
-  const sidebarVeil = document.getElementById('sidebarVeil');
-  const closeBtn    = document.getElementById('sidebarClose');
   const sidebarCart = document.getElementById('sidebarCartBtn');
 
-  function openSidebar() {
-    sidebarNav.classList.add('open');
-    sidebarVeil.classList.add('open');
-    document.body.style.overflow = 'hidden';
+  function toggleSidebar() {
+    const isOpen = sidebarNav.classList.toggle('open');
+    document.getElementById('page-push')?.classList.toggle('pushed', isOpen);
+    document.body.classList.toggle('sidebar-open', isOpen);
   }
   function closeSidebar() {
     sidebarNav.classList.remove('open');
-    sidebarVeil.classList.remove('open');
-    document.body.style.overflow = '';
+    document.getElementById('page-push')?.classList.remove('pushed');
+    document.body.classList.remove('sidebar-open');
   }
 
-  menuBtn?.addEventListener('click', openSidebar);
-  closeBtn?.addEventListener('click', closeSidebar);
-  sidebarVeil?.addEventListener('click', closeSidebar);
+  menuBtn?.addEventListener('click', toggleSidebar);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
   sidebarCart?.addEventListener('click', () => {
