@@ -1,0 +1,9 @@
+{% if section.blocks.size > 0 %}
+<div class="marquee">
+  <div class="marquee__track">
+    {% for block in section.blocks %}{% if block.type == 'item' %}<span class="marquee__item">{{ block.settings.text }}</span>{% endif %}{% endfor %}
+    {% for block in section.blocks %}{% if block.type == 'item' %}<span class="marquee__item">{{ block.settings.text }}</span>{% endif %}{% endfor %}
+  </div>
+</div>
+{% endif %}
+{% schema %}{"name":"Marquee","blocks":[{"type":"item","name":"Item","settings":[{"type":"text","id":"text","label":"Text","default":"NEW ARRIVALS"}]}],"presets":[{"name":"Marquee","blocks":[{"type":"item","settings":{"text":"NEW ARRIVALS"}},{"type":"item","settings":{"text":"FREE SHIPPING OVER $100"}},{"type":"item","settings":{"text":"SHOP THE COLLECTION"}},{"type":"item","settings":{"text":"MADE TO LAST"}}]}]}{% endschema %}

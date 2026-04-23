@@ -1,0 +1,230 @@
+<header class="site-header" id="siteHeader" role="banner">
+  <div class="header__inner">
+
+    <!-- MOBILE: MENU button (hidden on desktop) -->
+    <button class="header__menu-btn" id="menuBtn" aria-label="Open menu">MENU</button>
+
+    <!-- DESKTOP: left nav (hidden on mobile) -->
+    <nav class="header__nav" role="navigation">
+      {% for link in linklists[section.settings.menu].links %}
+        {% if link.links != blank %}
+          <div class="nav-item">{{ link.title }}
+            <div class="nav-item__drop">
+              {% for child in link.links %}<a href="{{ child.url }}">{{ child.title }}</a>{% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+
+    <!-- CENTER: logo (always visible) -->
+    <div class="header__logo">
+      <a href="/" aria-label="{{ shop.name }}">
+        {% if section.settings.logo %}
+          <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="{{ section.settings.logo_width }}" height="auto" loading="eager">
+        {% else %}
+          <span>{{ shop.name }}</span>
+        {% endif %}
+      </a>
+    </div>
+
+    <!-- RIGHT: controls -->
+    <div class="header__controls">
+      <!-- SEARCH: desktop only -->
+      <button id="searchBtn" class="header__search-btn" aria-label="Search">SEARCH</button>
+      <!-- ACCOUNT: always visible -->
+      <div class="acct-wrap">
+        <button>ACCOUNT</button>
+        <div class="acct-panel">
+          {% if customer %}
+            <a href="/account">MY ACCOUNT</a>
+            <a href="/account/logout">LOGOUT</a>
+          {% else %}
+            <a href="/account/login">LOGIN</a>
+            <a href="/account/register">REGISTER</a>
+          {% endif %}
+        </div>
+      </div>
+      <!-- CART: desktop only -->
+      <button id="cartBtn" class="header__cart-btn" aria-label="Open cart">CART<span class="cart-count" id="cartCount">{% if cart.item_count > 0 %}({{ cart.item_count }}){% endif %}</span></button>
+      <!-- HAMBURGER: hidden, replaced by MENU btn on mobile -->
+      <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+
+  </div>
+</header>
+
+<!-- SIDEBAR NAV (mobile) -->
+<div class="sidebar-veil" id="sidebarVeil"></div>
+<nav class="sidebar-nav" id="sidebarNav" aria-label="Mobile navigation">
+  <div class="sidebar-nav__head">
+    <button class="sidebar-nav__close" id="sidebarClose">&#215;</button>
+  </div>
+  <ul class="sidebar-nav__links">
+    {% for link in linklists[section.settings.menu].links %}
+      <li>
+        <a class="sidebar-nav__link" href="{{ link.url }}">{{ link.title }}</a>
+        {% if link.links != blank %}
+          <ul class="sidebar-nav__sub">
+            {% for child in link.links %}
+              <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="sidebar-nav__foot">
+    {% if customer %}
+      <a href="/account">MY ACCOUNT</a>
+      <a href="/account/logout">LOGOUT</a>
+    {% else %}
+      <a href="/account/login">LOGIN</a>
+      <a href="/account/register">REGISTER</a>
+    {% endif %}
+    <button id="sidebarCartBtn">CART ({{ cart.item_count }})</button>
+  </div>
+</nav>
+
+<style>
+/* ── Mobile: show MENU btn, hide desktop nav + hamburger + search + cart ── */
+@media (max-width: 960px) {
+  .header__nav        { display: none !important; }
+  .hamburger          { display: none !important; }
+  .header__search-btn { display: none !important; }
+  .header__cart-btn   { display: none !important; }
+  .header__menu-btn   { display: block !important; }
+}
+
+/* ── Desktop: hide MENU btn ── */
+@media (min-width: 961px) {
+  .header__menu-btn   { display: none !important; }
+}
+
+.header__menu-btn {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #000; flex: 1; text-align: left;
+}
+
+/* ── SIDEBAR ── */
+.sidebar-veil {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 700;
+}
+.sidebar-veil.open { display: block; }
+
+.sidebar-nav {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 280px;
+  background: #fff;
+  z-index: 800;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+  display: flex; flex-direction: column;
+  padding: 0;
+  overflow-y: auto;
+}
+.sidebar-nav.open { transform: translateX(0); }
+
+.sidebar-nav__head {
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.sidebar-nav__close {
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; line-height: 1; color: #000;
+}
+
+.sidebar-nav__links {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column;
+  flex: 1;
+}
+.sidebar-nav__link {
+  display: block;
+  padding: 16px 24px;
+  font-size: 13px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #000; border-bottom: 1px solid #f0f0f0;
+  transition: opacity 0.2s;
+}
+.sidebar-nav__link:hover { opacity: 0.5; }
+
+.sidebar-nav__sub {
+  list-style: none; padding: 0; margin: 0;
+  background: #fafafa;
+}
+.sidebar-nav__sub li a {
+  display: block; padding: 10px 24px 10px 36px;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #888; border-bottom: 1px solid #f0f0f0;
+  transition: color 0.2s;
+}
+.sidebar-nav__sub li a:hover { color: #000; }
+
+.sidebar-nav__foot {
+  padding: 20px 24px;
+  border-top: 1px solid #e5e5e5;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sidebar-nav__foot a,
+.sidebar-nav__foot button {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #999; background: none; border: none;
+  cursor: pointer; font-family: inherit; text-align: left;
+  transition: color 0.2s;
+}
+.sidebar-nav__foot a:hover,
+.sidebar-nav__foot button:hover { color: #000; }
+</style>
+
+<script>
+(function () {
+  const menuBtn     = document.getElementById('menuBtn');
+  const sidebarNav  = document.getElementById('sidebarNav');
+  const sidebarVeil = document.getElementById('sidebarVeil');
+  const closeBtn    = document.getElementById('sidebarClose');
+  const sidebarCart = document.getElementById('sidebarCartBtn');
+
+  function openSidebar() {
+    sidebarNav.classList.add('open');
+    sidebarVeil.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebarNav.classList.remove('open');
+    sidebarVeil.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn?.addEventListener('click', openSidebar);
+  closeBtn?.addEventListener('click', closeSidebar);
+  sidebarVeil?.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+  sidebarCart?.addEventListener('click', () => {
+    closeSidebar();
+    document.getElementById('cartBtn')?.click();
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    { "type": "image_picker", "id": "logo",       "label": "Logo" },
+    { "type": "range",        "id": "logo_width", "label": "Logo width", "min": 60, "max": 260, "step": 10, "unit": "px", "default": 100 },
+    { "type": "link_list",    "id": "menu",       "label": "Menu", "default": "main-menu" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,81 @@
+{% assign cv = product.selected_or_first_available_variant %}
+<div class="product-layout">
+  <!-- GALLERY -->
+  <div class="pgallery">
+    <div class="pgallery__main">
+      <img id="pgMain"
+        src="{{ cv.image | default: product.featured_image | image_url: width: 1200 }}"
+        srcset="{{ cv.image | default: product.featured_image | image_url: width: 600 }} 600w, {{ cv.image | default: product.featured_image | image_url: width: 1200 }} 1200w"
+        sizes="50vw" alt="{{ product.title | escape }}" loading="eager" fetchpriority="high">
+    </div>
+    {% if product.images.size > 1 %}
+    <div class="pgallery__thumbs">
+      {% for img in product.images %}
+        <button class="pgallery__thumb {% if forloop.first %}active{% endif %}"
+          data-src="{{ img | image_url: width: 1200 }}"
+          data-srcset="{{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 1200 }} 1200w"
+          aria-label="View image {{ forloop.index }}">
+          <img src="{{ img | image_url: width: 130 }}" alt="" loading="lazy">
+        </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- INFO PANEL -->
+  <div class="pinfo">
+    {% if product.vendor != blank %}<p class="pinfo__vendor">{{ product.vendor }}</p>{% endif %}
+    <h1 class="pinfo__title">{{ product.title }}</h1>
+    <div class="pinfo__price">
+      {% if cv.compare_at_price > cv.price %}
+        <s class="pinfo__compare">{{ cv.compare_at_price | money }}</s>
+        <span class="pinfo__sale">{{ cv.price | money }}</span>
+      {% else %}
+        <span>{{ cv.price | money }}</span>
+      {% endif %}
+    </div>
+
+    <form action="/cart/add" method="post" data-atc-form>
+      <input type="hidden" name="id" value="{{ cv.id }}" id="variantId">
+      {% unless product.has_only_default_variant %}
+        <div class="variants">
+          {% for opt in product.options_with_values %}
+            <div>
+              <p class="variant__label">{{ opt.name | upcase }}</p>
+              <div class="variant__opts">
+                {% for val in opt.values %}
+                  <button type="button" class="vbtn {% if opt.selected_value == val %}sel{% endif %}" data-group="{{ opt.name }}" data-val="{{ val }}">{{ val }}</button>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endunless %}
+      <button type="submit" class="btn-atc"{% unless cv.available %} disabled{% endunless %}>
+        {% if cv.available %}ADD TO CART{% else %}SOLD OUT{% endif %}
+      </button>
+    </form>
+
+    {% if product.description != blank %}
+    <div class="accordion">
+      <div class="acc-item">
+        <button class="acc-trigger"><span>DESCRIPTION</span><span class="acc-icon">+</span></button>
+        <div class="acc-body">{{ product.description }}</div>
+      </div>
+      {% if section.settings.shipping_text != blank %}
+      <div class="acc-item">
+        <button class="acc-trigger"><span>SHIPPING & RETURNS</span><span class="acc-icon">+</span></button>
+        <div class="acc-body">{{ section.settings.shipping_text }}</div>
+      </div>
+      {% endif %}
+      {% if section.settings.care_text != blank %}
+      <div class="acc-item">
+        <button class="acc-trigger"><span>CARE</span><span class="acc-icon">+</span></button>
+        <div class="acc-body">{{ section.settings.care_text }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% schema %}{"name":"Product","settings":[{"type":"richtext","id":"shipping_text","label":"Shipping & Returns","default":"<p>Free standard shipping on orders over $100. Returns accepted within 30 days.</p>"},{"type":"richtext","id":"care_text","label":"Care instructions"}]}{% endschema %}

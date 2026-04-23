@@ -1,0 +1,116 @@
+<div class="carousel-wrap">
+
+  <div class="carousel">
+    {% assign slide_index = 0 %}
+    {% for block in section.blocks %}
+      {% if block.type == 'slide' and block.settings.image %}
+        <div class="slide {% if slide_index == 0 %}active{% endif %}" {{ block.shopify_attributes }}>
+          {{
+            block.settings.image
+            | image_url: width: 2000
+            | image_tag:
+              loading: 'lazy',
+              alt: block.settings.image.alt | default: block.settings.caption,
+              widths: '800, 1200, 1600, 2000',
+              sizes: '100vw'
+          }}
+          {% if block.settings.caption != blank %}
+            <p class="slide__caption">{{ block.settings.caption }}</p>
+          {% endif %}
+        </div>
+        {% assign slide_index = slide_index | plus: 1 %}
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if slide_index > 1 %}
+    <div class="dots">
+      {% assign dot_index = 0 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'slide' and block.settings.image %}
+          <button
+            class="dot {% if dot_index == 0 %}active{% endif %}"
+            data-index="{{ dot_index }}"
+            aria-label="Go to slide {{ dot_index | plus: 1 }}"
+          ></button>
+          {% assign dot_index = dot_index | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <script>
+(function () {
+  const wrap = document.currentScript.closest('.carousel-wrap');
+  if (!wrap) return;
+  const slides = wrap.querySelectorAll('.slide');
+  const dots   = wrap.querySelectorAll('.dot');
+  let current  = 0;
+  let timer;
+
+  function goTo(index) {
+    slides[current].classList.remove('active');
+    dots[current]?.classList.remove('active');
+    current = (index + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dots[current]?.classList.add('active');
+  }
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      clearInterval(timer);
+      goTo(parseInt(dot.dataset.index));
+      startAuto();
+    });
+  });
+
+  function startAuto() {
+    timer = setInterval(() => goTo(current + 1), 3000);
+  }
+
+  let startX = 0;
+  wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  wrap.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) { clearInterval(timer); goTo(current + (diff > 0 ? 1 : -1)); startAuto(); }
+  }, { passive: true });
+
+  if (slides.length > 1) startAuto();
+})();
+  </script>
+
+</div>
+
+<style>
+.carousel-wrap { position: relative; width: 100%; user-select: none; }
+.carousel { position: relative; width: 100%; overflow: hidden; }
+.slide { display: none; width: 100%; }
+.slide.active { display: block; }
+.slide img { width: 100%; height: auto; display: block; }
+.slide__caption { text-align: center; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; padding: 10px 0 4px; }
+.dots { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 14px 0 4px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #ccc; background: transparent; cursor: pointer; padding: 0; transition: background 0.2s, border-color 0.2s; }
+.dot.active { background: #000; border-color: #000; }
+.dot:hover:not(.active) { border-color: #999; }
+</style>
+
+{% schema %}
+{
+  "name": "Image Carousel",
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "image",   "label": "Image" },
+        { "type": "text",         "id": "caption", "label": "Caption" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Carousel"
+    }
+  ]
+}
+{% endschema %}

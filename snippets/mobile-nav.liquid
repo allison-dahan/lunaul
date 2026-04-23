@@ -1,0 +1,18 @@
+<nav class="mob-nav" id="mobNav" aria-label="Mobile navigation" aria-hidden="true">
+  <button class="mob-nav__close" id="mobNavClose" aria-label="Close">&#215;</button>
+  <ul class="mob-nav__links">
+    {% for link in linklists['main-menu'].links %}
+      <li>
+        <a class="mob-nav__link" href="{{ link.url }}">{{ link.title }}</a>
+        {% if link.links != blank %}
+          <ul class="mob-nav__sub">{% for child in link.links %}<li><a href="{{ child.url }}">{{ child.title }}</a></li>{% endfor %}</ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="mob-nav__foot">
+    {% if customer %}<a href="/account">ACCOUNT</a><a href="/account/logout">LOGOUT</a>
+    {% else %}<a href="/account/login">LOGIN</a><a href="/account/register">REGISTER</a>{% endif %}
+    <button id="mobCartBtn">CART ({{ cart.item_count }})</button>
+  </div>
+</nav>

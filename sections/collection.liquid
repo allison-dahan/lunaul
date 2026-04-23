@@ -1,0 +1,34 @@
+{% paginate collection.products by section.settings.per_page %}
+<div class="coll-bar">
+  <div>
+    <h1 class="coll-title">{{ collection.title }}</h1>
+    <span class="coll-meta">{{ collection.products_count }} ITEMS</span>
+  </div>
+  <select class="sort-select" onchange="location.href=this.value" aria-label="Sort by">
+    {% assign sb = collection.sort_by | default: collection.default_sort_by %}
+    <option value="{{ collection.url }}?sort_by=manual"             {% if sb=='manual'             %}selected{% endif %}>FEATURED</option>
+    <option value="{{ collection.url }}?sort_by=created-descending" {% if sb=='created-descending' %}selected{% endif %}>NEWEST</option>
+    <option value="{{ collection.url }}?sort_by=best-selling"       {% if sb=='best-selling'       %}selected{% endif %}>BEST SELLING</option>
+    <option value="{{ collection.url }}?sort_by=price-ascending"    {% if sb=='price-ascending'    %}selected{% endif %}>PRICE: LOW-HIGH</option>
+    <option value="{{ collection.url }}?sort_by=price-descending"   {% if sb=='price-descending'   %}selected{% endif %}>PRICE: HIGH-LOW</option>
+  </select>
+</div>
+<div class="coll-body">
+  {% if collection.products.size > 0 %}
+    <div class="prod-grid">{% for p in collection.products %}{% render 'product-card', product: p %}{% endfor %}</div>
+    {% if paginate.pages > 1 %}
+      <div style="display:flex;justify-content:center;gap:14px;margin-top:48px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;">
+        {% if paginate.previous %}<a href="{{ paginate.previous.url }}" style="color:#999;">&larr; PREV</a>{% endif %}
+        {% for part in paginate.parts %}
+          {% if part.is_link %}<a href="{{ part.url }}" {% if part.is_current %}style="border-bottom:1px solid #000;"{% else %}style="color:#999;"{% endif %}>{{ part.title }}</a>
+          {% else %}<span style="color:#ccc;">{{ part.title }}</span>{% endif %}
+        {% endfor %}
+        {% if paginate.next %}<a href="{{ paginate.next.url }}" style="color:#999;">NEXT &rarr;</a>{% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p style="text-align:center;padding:80px 0;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#999;">NO PRODUCTS FOUND.</p>
+  {% endif %}
+</div>
+{% endpaginate %}
+{% schema %}{"name":"Collection","settings":[{"type":"range","id":"per_page","label":"Products per page","min":8,"max":48,"step":4,"default":24}]}{% endschema %}

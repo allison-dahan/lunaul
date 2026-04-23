@@ -1,0 +1,33 @@
+<div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Cart">
+  <div class="cart-drawer__head">
+    <span class="cart-drawer__title">CART</span>
+    <button class="cart-drawer__close" id="cartClose">CLOSE</button>
+  </div>
+  <div class="cart-drawer__body" id="cartBody">
+    {% if cart.item_count == 0 %}
+      <p class="cart-empty">YOUR CART IS EMPTY.</p>
+    {% else %}
+      {% for item in cart.items %}
+        <div class="cart-line" data-key="{{ item.key }}">
+          <img class="cart-line__img" src="{{ item.image | image_url: width: 160 }}" alt="{{ item.title | escape }}" loading="lazy">
+          <div>
+            <div class="cart-line__name">{{ item.product_title }}</div>
+            {% if item.variant_title and item.variant_title != 'Default Title' %}<div class="cart-line__variant">{{ item.variant_title }}</div>{% endif %}
+            <div class="cart-line__price">{{ item.final_line_price | money }}</div>
+            <div class="cart-line__qty">
+              <button class="qty-btn" onclick="changeQty('{{ item.key }}',-1)">&#8722;</button>
+              <span>{{ item.quantity }}</span>
+              <button class="qty-btn" onclick="changeQty('{{ item.key }}',1)">+</button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  <div class="cart-drawer__foot">
+    <div class="cart-subtotal"><span>SUBTOTAL</span><span id="cartTotal">{{ cart.total_price | money }}</span></div>
+    <p class="cart-note">Shipping &amp; taxes calculated at checkout</p>
+    <a href="/checkout" class="btn-checkout">CHECKOUT</a>
+    <a href="/cart" class="btn-view-cart">VIEW CART</a>
+  </div>
+</div>

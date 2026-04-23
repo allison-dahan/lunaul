@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="template-{{ template.name }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="canonical" href="{{ canonical_url }}">
+  {% if settings.favicon %}<link rel="shortcut icon" href="{{ settings.favicon | image_url: width: 32, height: 32 }}" type="image/png">{% endif %}
+  <title>{{ page_title }}{% unless page_title contains shop.name %} — {{ shop.name }}{% endunless %}</title>
+  {% if page_description %}<meta name="description" content="{{ page_description | escape }}">{% endif %}
+  {{ content_for_header }}
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+</head>
+<body>
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="loader__wordmark">
+      {% if settings.logo %}<img src="{{ settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}">
+      {% else %}{{ shop.name }}{% endif %}
+    </div>
+  </div>
+
+  <!-- SEARCH OVERLAY -->
+  <div class="search-overlay" id="searchOverlay">
+    <form action="/search" method="get" style="flex:1;display:flex;align-items:center;gap:12px;">
+      <input type="search" name="q" placeholder="SEARCH..." autocomplete="off">
+      <button type="submit" style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#999;background:none;border:none;font-family:inherit;cursor:pointer;">GO</button>
+    </form>
+    <button class="close-search" id="closeSearch">CLOSE</button>
+  </div>
+
+  {% section 'announcement-bar' %}
+  {% section 'header' %}
+
+  <!-- CART VEIL + DRAWER -->
+  <div class="cart-veil" id="cartVeil"></div>
+  {% render 'cart-drawer' %}
+
+  <!-- MOBILE NAV -->
+  {% render 'mobile-nav' %}
+
+  <main id="main">{{ content_for_layout }}</main>
+
+  {% section 'footer' %}
+
+  {{ 'theme.js' | asset_url | script_tag }}
+</body>
+</html>

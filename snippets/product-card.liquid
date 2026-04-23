@@ -1,0 +1,31 @@
+{% assign on_sale = false %}
+{% if product.compare_at_price > product.price %}{% assign on_sale = true %}{% endif %}
+<a class="pcard" href="{{ product.url }}" data-fade>
+  <div class="pcard__img-wrap">
+    {% if product.featured_image %}
+      <img src="{{ product.featured_image | image_url: width: 700 }}"
+           srcset="{{ product.featured_image | image_url: width: 350 }} 350w, {{ product.featured_image | image_url: width: 700 }} 700w, {{ product.featured_image | image_url: width: 1000 }} 1000w"
+           sizes="(max-width:600px) 50vw, 25vw"
+           alt="{{ product.featured_image.alt | default: product.title | escape }}" loading="lazy">
+      {% if product.images[1] %}
+        <img class="pcard__img--alt"
+          src="{{ product.images[1] | image_url: width: 700 }}"
+          alt="{{ product.title | escape }}" loading="lazy">
+      {% endif %}
+    {% endif %}
+    {% if on_sale %}<span class="pcard__badge pcard__badge--sale">SALE</span>{% endif %}
+  </div>
+  <div class="pcard__info">
+    <p class="pcard__name">{{ product.title }}</p>
+    <div class="pcard__price">
+      {% if on_sale %}
+        <span class="pcard__compare">{{ product.compare_at_price | money }}</span>
+        <span class="pcard__sale">{{ product.price | money }}</span>
+      {% elsif product.price_varies %}
+        <span>From {{ product.price_min | money }}</span>
+      {% else %}
+        <span>{{ product.price | money }}</span>
+      {% endif %}
+    </div>
+  </div>
+</a>

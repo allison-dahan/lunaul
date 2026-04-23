@@ -1,0 +1,13 @@
+<div class="sec-row" data-fade>
+  <span class="sec-row__title">{{ section.settings.heading | default: 'NEW ARRIVALS' }}</span>
+  {% assign ch = section.settings.collection %}
+  <a class="sec-row__more" href="{% if ch != blank %}/collections/{{ ch }}{% else %}/collections/all{% endif %}">VIEW ALL</a>
+</div>
+<div class="prod-grid" data-fade>
+  {% if ch != blank %}
+    {% for p in collections[ch].products limit: section.settings.count %}{% render 'product-card', product: p %}{% endfor %}
+  {% else %}
+    {% for p in collections.all.products limit: section.settings.count %}{% render 'product-card', product: p %}{% endfor %}
+  {% endif %}
+</div>
+{% schema %}{"name":"Featured Collection","settings":[{"type":"text","id":"heading","label":"Heading","default":"NEW ARRIVALS"},{"type":"collection","id":"collection","label":"Collection"},{"type":"range","id":"count","label":"Products to show","min":2,"max":12,"step":1,"default":4}],"presets":[{"name":"Featured Collection"}]}{% endschema %}
