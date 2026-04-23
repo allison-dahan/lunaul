@@ -1,34 +1,216 @@
 {% paginate collection.products by section.settings.per_page %}
+
+<div class="coll-title-wrap">
+  <h1 class="coll-title">{{ collection.title }}</h1>
+</div>
+
 <div class="coll-bar">
-  <div>
-    <h1 class="coll-title">{{ collection.title }}</h1>
-    <span class="coll-meta">{{ collection.products_count }} ITEMS</span>
-  </div>
   <select class="sort-select" onchange="location.href=this.value" aria-label="Sort by">
     {% assign sb = collection.sort_by | default: collection.default_sort_by %}
-    <option value="{{ collection.url }}?sort_by=manual"             {% if sb=='manual'             %}selected{% endif %}>FEATURED</option>
-    <option value="{{ collection.url }}?sort_by=created-descending" {% if sb=='created-descending' %}selected{% endif %}>NEWEST</option>
-    <option value="{{ collection.url }}?sort_by=best-selling"       {% if sb=='best-selling'       %}selected{% endif %}>BEST SELLING</option>
-    <option value="{{ collection.url }}?sort_by=price-ascending"    {% if sb=='price-ascending'    %}selected{% endif %}>PRICE: LOW-HIGH</option>
-    <option value="{{ collection.url }}?sort_by=price-descending"   {% if sb=='price-descending'   %}selected{% endif %}>PRICE: HIGH-LOW</option>
+    <option value="{{ collection.url }}?sort_by=manual"             {% if sb == 'manual'             %}selected{% endif %}>FEATURED</option>
+    <option value="{{ collection.url }}?sort_by=created-descending" {% if sb == 'created-descending' %}selected{% endif %}>NEWEST</option>
+    <option value="{{ collection.url }}?sort_by=best-selling"       {% if sb == 'best-selling'       %}selected{% endif %}>BEST SELLING</option>
+    <option value="{{ collection.url }}?sort_by=price-ascending"    {% if sb == 'price-ascending'    %}selected{% endif %}>PRICE: LOW-HIGH</option>
+    <option value="{{ collection.url }}?sort_by=price-descending"   {% if sb == 'price-descending'   %}selected{% endif %}>PRICE: HIGH-LOW</option>
   </select>
 </div>
+
+<!-- Column toggle buttons -->
+<div class="col-toggles">
+  <div class="col-toggles__desktop">
+    <button class="col-btn active" data-cols="2">2</button>
+    <button class="col-btn" data-cols="4">4</button>
+  </div>
+  <div class="col-toggles__mobile">
+    <button class="col-btn active" data-cols="1">1</button>
+    <button class="col-btn" data-cols="2">2</button>
+  </div>
+</div>
+
 <div class="coll-body">
   {% if collection.products.size > 0 %}
-    <div class="prod-grid">{% for p in collection.products %}{% render 'product-card', product: p %}{% endfor %}</div>
+    <div class="prod-grid" id="prodGrid">
+      {% for p in collection.products %}
+        {% render 'product-card', product: p %}
+      {% endfor %}
+    </div>
+
     {% if paginate.pages > 1 %}
-      <div style="display:flex;justify-content:center;gap:14px;margin-top:48px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;">
-        {% if paginate.previous %}<a href="{{ paginate.previous.url }}" style="color:#999;">&larr; PREV</a>{% endif %}
+      <div class="coll-pagination">
+        {% if paginate.previous %}<a href="{{ paginate.previous.url }}">&larr; PREV</a>{% endif %}
         {% for part in paginate.parts %}
-          {% if part.is_link %}<a href="{{ part.url }}" {% if part.is_current %}style="border-bottom:1px solid #000;"{% else %}style="color:#999;"{% endif %}>{{ part.title }}</a>
-          {% else %}<span style="color:#ccc;">{{ part.title }}</span>{% endif %}
+          {% if part.is_link %}
+            <a href="{{ part.url }}" {% if part.is_current %}class="current"{% endif %}>{{ part.title }}</a>
+          {% else %}
+            <span>{{ part.title }}</span>
+          {% endif %}
         {% endfor %}
-        {% if paginate.next %}<a href="{{ paginate.next.url }}" style="color:#999;">NEXT &rarr;</a>{% endif %}
+        {% if paginate.next %}<a href="{{ paginate.next.url }}">NEXT &rarr;</a>{% endif %}
       </div>
     {% endif %}
+
   {% else %}
-    <p style="text-align:center;padding:80px 0;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#999;">NO PRODUCTS FOUND.</p>
+    <p class="coll-empty">NO PRODUCTS FOUND.</p>
   {% endif %}
 </div>
+
 {% endpaginate %}
-{% schema %}{"name":"Collection","settings":[{"type":"range","id":"per_page","label":"Products per page","min":8,"max":48,"step":4,"default":24}]}{% endschema %}
+
+<style>
+.coll-title-wrap {
+  text-align: center;
+  padding: 32px 24px 0;
+}
+.coll-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.coll-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 10px 16px 8px;
+}
+.coll-meta {
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #aaa;
+  line-height: 1.4;
+}
+.coll-meta span { display: block; }
+.coll-meta__line { margin-top: 1px; }
+.sort-select {
+  font-family: inherit; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  border: none; outline: none; background: none;
+  color: #000; cursor: pointer;
+}
+
+/* Column toggles */
+.col-toggles {
+  display: flex;
+  padding: 0 16px 12px;
+}
+.col-toggles__desktop { display: flex; gap: 10px; }
+.col-toggles__mobile  { display: none; gap: 10px; }
+.col-btn {
+  font-family: inherit; font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #ccc; background: none; border: none;
+  cursor: pointer; padding: 0;
+  transition: color 0.2s;
+}
+.col-btn.active { color: #000; text-decoration: underline; }
+.col-btn:hover  { color: #000; }
+
+/* Grid */
+.prod-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+.prod-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.prod-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.prod-grid.cols-1 { grid-template-columns: repeat(1, 1fr); }
+
+.pcard { display: block; background: #fff; }
+.pcard__img-wrap {
+  aspect-ratio: 3/4; overflow: hidden;
+  background: #fff; position: relative;
+}
+.pcard__img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcard__img--alt { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s ease; }
+.pcard:hover .pcard__img--alt { opacity: 1; }
+.pcard__info { padding: 10px 16px 20px; }
+.pcard__name { font-size: 11px; font-weight: 400; letter-spacing: 0.04em; line-height: 1.4; margin-bottom: 5px; }
+.pcard__price { font-size: 11px; font-weight: 700; color: #000; display: flex; gap: 8px; align-items: center; }
+.pcard__compare { color: #bbb; text-decoration: line-through; }
+.pcard__sale    { color: #b00; }
+.pcard__badge {
+  position: absolute; top: 10px; left: 10px;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #fff; background: #000;
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; line-height: 1.2;
+}
+
+.coll-pagination {
+  display: flex; justify-content: center; gap: 14px;
+  padding: 48px 0;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+}
+.coll-pagination a { color: #999; transition: color 0.2s; }
+.coll-pagination a:hover, .coll-pagination .current { color: #000; }
+.coll-pagination .current { border-bottom: 1px solid #000; }
+.coll-pagination span { color: #ccc; }
+.coll-empty { text-align: center; padding: 80px 0; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #999; }
+
+/* Mobile */
+@media (max-width: 767px) {
+  .col-toggles__desktop { display: none; }
+  .col-toggles__mobile  { display: flex; }
+}
+</style>
+
+<script>
+(function () {
+  const grid     = document.getElementById('prodGrid');
+  const colCount = document.getElementById('colCount');
+  const isMobile = () => window.innerWidth < 768;
+
+  // Set default cols based on viewport
+  let currentCols = isMobile() ? 1 : 2;
+  applyGrid(currentCols);
+
+  // Wire up all toggle buttons
+  document.querySelectorAll('.col-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cols = parseInt(btn.dataset.cols);
+
+      // Update active state within the same group only
+      const group = btn.closest('.col-toggles__desktop, .col-toggles__mobile');
+      group.querySelectorAll('.col-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      applyGrid(cols);
+    });
+  });
+
+  function applyGrid(cols) {
+    if (!grid) return;
+    grid.classList.remove('cols-1', 'cols-2', 'cols-4');
+    grid.classList.add('cols-' + cols);
+    if (colCount) colCount.textContent = cols;
+    currentCols = cols;
+  }
+
+  // Re-apply correct defaults on resize
+  window.addEventListener('resize', () => {
+    const mobile = isMobile();
+    const desktopBtns = document.querySelector('.col-toggles__desktop');
+    const mobileBtns  = document.querySelector('.col-toggles__mobile');
+    if (mobile && desktopBtns) {
+      const activeM = mobileBtns?.querySelector('.col-btn.active');
+      if (activeM) applyGrid(parseInt(activeM.dataset.cols));
+    } else if (!mobile && mobileBtns) {
+      const activeD = desktopBtns?.querySelector('.col-btn.active');
+      if (activeD) applyGrid(parseInt(activeD.dataset.cols));
+    }
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Collection",
+  "settings": [
+    { "type": "range", "id": "per_page", "label": "Products per page", "min": 8, "max": 48, "step": 4, "default": 24 }
+  ]
+}
+{% endschema %}
