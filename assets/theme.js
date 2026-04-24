@@ -16,47 +16,24 @@ window.addEventListener('scroll', () => {
 // SEARCH
 document.getElementById('searchBtn').addEventListener('click', () => document.getElementById('searchOverlay').classList.add('open'));
 document.getElementById('closeSearch').addEventListener('click', () => document.getElementById('searchOverlay').classList.remove('open'));
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('searchOverlay').classList.remove('open'); closeMobNav(); closeCart(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.getElementById('searchOverlay').classList.remove('open'); closeMobNav(); } });
 
 // MOBILE NAV
 document.getElementById('hamburger').addEventListener('click', () => document.getElementById('mobNav').classList.add('open'));
 document.getElementById('mobNavClose').addEventListener('click', closeMobNav);
 function closeMobNav() { document.getElementById('mobNav').classList.remove('open'); }
 
-// CART DRAWER
-function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('cartVeil').classList.add('open'); document.body.style.overflow='hidden'; renderCart(); }
-function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('cartVeil').classList.remove('open'); document.body.style.overflow=''; }
-document.getElementById('cartBtn').addEventListener('click', openCart);
-document.getElementById('cartClose').addEventListener('click', closeCart);
-document.getElementById('cartVeil').addEventListener('click', closeCart);
-document.getElementById('mobCartBtn')?.addEventListener('click', () => { closeMobNav(); openCart(); });
-
-// CART AJAX
+// CART COUNT
 async function updateCount() {
   try {
     const r = await fetch('/cart.js'); const c = await r.json();
     const el = document.getElementById('cartCount');
     if (el) el.textContent = c.item_count > 0 ? '(' + c.item_count + ')' : '';
-    return c;
   } catch(e) {}
 }
-async function renderCart() {
-  try {
-    const c = await updateCount(); if (!c) return;
-    const body = document.getElementById('cartBody');
-    const tot  = document.getElementById('cartTotal');
-    if (!c.item_count) { body.innerHTML = '<p class="cart-empty">YOUR CART IS EMPTY.</p>'; return; }
-    body.innerHTML = c.items.map(i => `<div class="cart-line"><img class="cart-line__img" src="${i.image}" alt="${i.title}"><div><div class="cart-line__name">${i.product_title}</div>${i.variant_title && i.variant_title !== 'Default Title' ? '<div class="cart-line__variant">' + i.variant_title + '</div>' : ''}<div class="cart-line__price">${money(i.final_line_price)}</div><div class="cart-line__qty"><button class="qty-btn" onclick="changeQty('${i.key}',-1)">−</button><span>${i.quantity}</span><button class="qty-btn" onclick="changeQty('${i.key}',1)">+</button></div></div></div>`).join('');
-    if (tot) tot.textContent = money(c.total_price);
-  } catch(e) {}
-}
-async function changeQty(key, delta) {
-  const r = await fetch('/cart.js'); const c = await r.json();
-  const item = c.items.find(i => i.key === key); if (!item) return;
-  await fetch('/cart/change.js', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: key, quantity: Math.max(0, item.quantity + delta) }) });
-  renderCart();
-}
-function money(cents) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(cents/100); }
+
+// ATC: redirect to cart page after adding
+function openCart() { window.location.href = '/cart'; }
 
 // ATC
 document.addEventListener('submit', async e => {

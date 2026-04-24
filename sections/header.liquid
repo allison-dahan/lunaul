@@ -48,7 +48,7 @@
         </div>
       </div>
       <!-- CART: desktop only -->
-      <button id="cartBtn" class="header__cart-btn" aria-label="Open cart">CART<span class="cart-count" id="cartCount">{% if cart.item_count > 0 %}({{ cart.item_count }}){% endif %}</span></button>
+      <a href="/cart" class="header__cart-btn" aria-label="Cart">CART<span class="cart-count" id="cartCount">{% if cart.item_count > 0 %}({{ cart.item_count }}){% endif %}</span></a>
       <!-- HAMBURGER: hidden, replaced by MENU btn on mobile -->
       <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
     </div>
@@ -72,9 +72,9 @@
       </li>
     {% endfor %}
     <li>
-      <button class="sidebar-nav__link sidebar-nav__cart-btn" id="sidebarCartBtn">
+      <a class="sidebar-nav__link" href="/cart">
         CART{% if cart.item_count > 0 %} ({{ cart.item_count }}){% endif %}
-      </button>
+      </a>
     </li>
   </ul>
   <div class="sidebar-nav__foot">
@@ -205,9 +205,8 @@ li:has(.sidebar-nav__sub) > .sidebar-nav__link::after {
 
 <script>
 (function () {
-  const menuBtn     = document.getElementById('menuBtn');
-  const sidebarNav  = document.getElementById('sidebarNav');
-  const sidebarCart = document.getElementById('sidebarCartBtn');
+  const menuBtn    = document.getElementById('menuBtn');
+  const sidebarNav = document.getElementById('sidebarNav');
 
   function toggleSidebar() {
     const isOpen = sidebarNav.classList.toggle('open');
@@ -222,11 +221,6 @@ li:has(.sidebar-nav__sub) > .sidebar-nav__link::after {
 
   menuBtn?.addEventListener('click', toggleSidebar);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
-
-  sidebarCart?.addEventListener('click', () => {
-    closeSidebar();
-    if (typeof openCart === 'function') openCart();
-  });
 })();
 </script>
 
