@@ -1,25 +1,24 @@
 {% assign cv = product.selected_or_first_available_variant %}
 <div class="product-layout">
-  <!-- GALLERY -->
+  <!-- GALLERY: 2-col grid, arrow advances one at a time -->
   <div class="pgallery">
-    <div class="pgallery__main">
-      <img id="pgMain"
-        src="{{ cv.image | default: product.featured_image | image_url: width: 1200 }}"
-        srcset="{{ cv.image | default: product.featured_image | image_url: width: 600 }} 600w, {{ cv.image | default: product.featured_image | image_url: width: 1200 }} 1200w"
-        sizes="50vw" alt="{{ product.title | escape }}" loading="eager" fetchpriority="high">
+    <div class="pgallery__viewport">
+      <div class="pgallery__track" id="galleryTrack">
+        {% for img in product.images %}
+          <div class="pgallery__slide">
+            <img src="{{ img | image_url: width: 1400 }}"
+                 srcset="{{ img | image_url: width: 700 }} 700w, {{ img | image_url: width: 1400 }} 1400w"
+                 sizes="25vw"
+                 alt="{{ img.alt | default: product.title | escape }}"
+                 data-full="{{ img | image_url: width: 2000 }}"
+                 class="pgallery__zoomable"
+                 {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="pgallery__arrow pgallery__arrow--prev" id="galleryPrev"></button>
+      <button class="pgallery__arrow pgallery__arrow--next" id="galleryNext"></button>
     </div>
-    {% if product.images.size > 1 %}
-    <div class="pgallery__thumbs">
-      {% for img in product.images %}
-        <button class="pgallery__thumb {% if forloop.first %}active{% endif %}"
-          data-src="{{ img | image_url: width: 1200 }}"
-          data-srcset="{{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 1200 }} 1200w"
-          aria-label="View image {{ forloop.index }}">
-          <img src="{{ img | image_url: width: 130 }}" alt="" loading="lazy">
-        </button>
-      {% endfor %}
-    </div>
-    {% endif %}
   </div>
 
   <!-- INFO PANEL -->
@@ -59,23 +58,98 @@
     {% if product.description != blank %}
     <div class="accordion">
       <div class="acc-item">
-        <button class="acc-trigger"><span>DESCRIPTION</span><span class="acc-icon">+</span></button>
+        <button class="acc-trigger">
+          <span>DESCRIPTION</span><span class="acc-chevron">›</span>
+        </button>
         <div class="acc-body">{{ product.description }}</div>
       </div>
-      {% if section.settings.shipping_text != blank %}
+      {% if section.settings.size_text != blank %}
       <div class="acc-item">
-        <button class="acc-trigger"><span>SHIPPING & RETURNS</span><span class="acc-icon">+</span></button>
-        <div class="acc-body">{{ section.settings.shipping_text }}</div>
+        <button class="acc-trigger">
+          <span>SIZE</span><span class="acc-chevron">›</span>
+        </button>
+        <div class="acc-body">{{ section.settings.size_text }}</div>
       </div>
       {% endif %}
-      {% if section.settings.care_text != blank %}
+      {% if section.settings.shipping_text != blank %}
       <div class="acc-item">
-        <button class="acc-trigger"><span>CARE</span><span class="acc-icon">+</span></button>
-        <div class="acc-body">{{ section.settings.care_text }}</div>
+        <button class="acc-trigger">
+          <span>SHIPPING &amp; RETURN</span><span class="acc-chevron">›</span>
+        </button>
+        <div class="acc-body">{{ section.settings.shipping_text }}</div>
       </div>
       {% endif %}
     </div>
     {% endif %}
   </div>
 </div>
-{% schema %}{"name":"Product","settings":[{"type":"richtext","id":"shipping_text","label":"Shipping & Returns","default":"<p>Free standard shipping on orders over $100. Returns accepted within 30 days.</p>"},{"type":"richtext","id":"care_text","label":"Care instructions"}]}{% endschema %}
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox__close" id="lightboxClose">&#215;</button>
+  <img class="lightbox__img" id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+// Lightbox
+const lightbox     = document.getElementById('lightbox');
+const lightboxImg  = document.getElementById('lightboxImg');
+const lightboxClose = document.getElementById('lightboxClose');
+
+document.querySelectorAll('.pgallery__zoomable').forEach(img => {
+  img.style.cursor = 'zoom-in';
+  img.addEventListener('click', () => {
+    lightboxImg.src = img.dataset.full;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+});
+
+lightboxClose?.addEventListener('click', closeLightbox);
+lightbox?.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+(function () {
+  const track   = document.getElementById('galleryTrack');
+  const prevBtn = document.getElementById('galleryPrev');
+  const nextBtn = document.getElementById('galleryNext');
+  if (!track) return;
+
+  const slides = track.querySelectorAll('.pgallery__slide');
+  const max    = Math.max(0, slides.length - 2);
+  let current  = 0;
+
+  function goTo(index) {
+    current = Math.max(0, Math.min(index, max));
+    track.style.transform = `translateX(-${current * 50}%)`;
+    if (prevBtn) prevBtn.disabled = current === 0;
+    if (nextBtn) nextBtn.disabled = current === max;
+  }
+
+  prevBtn?.addEventListener('click', () => goTo(current - 1));
+  nextBtn?.addEventListener('click', () => goTo(current + 1));
+
+  let startX = 0;
+  track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+  }, { passive: true });
+
+  goTo(0);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": [
+    { "type": "richtext", "id": "size_text", "label": "Size text" },
+    { "type": "richtext", "id": "shipping_text", "label": "Shipping & Return", "default": "<p>Free standard shipping on orders over $100. Returns accepted within 30 days.</p>" }
+  ]
+}
+{% endschema %}

@@ -75,7 +75,7 @@
     if (Math.abs(diff) > 40) { clearInterval(timer); goTo(current + (diff > 0 ? 1 : -1)); startAuto(); }
   }, { passive: true });
 
-  // autoplay disabled
+  if (slides.length > 1) startAuto();
 })();
   </script>
 
