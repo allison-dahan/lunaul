@@ -27,21 +27,25 @@
     <h1 class="pinfo__title">{{ product.title }}</h1>
 
     <div class="pinfo__pricing">
-      {% if cv.compare_at_price > cv.price %}
-        <div class="pinfo__price-row">
-          <span class="pinfo__label">PRICE</span>
-          <span class="pinfo__compare">{{ cv.compare_at_price | money }}</span>
-        </div>
-        <div class="pinfo__price-row">
-          <span class="pinfo__label">SALE</span>
-          <span class="pinfo__sale">{{ cv.price | money }}</span>
-        </div>
+      {% unless cv.available %}
+        <span class="pinfo__sold-out">SOLD OUT</span>
       {% else %}
-        <div class="pinfo__price-row">
-          <span class="pinfo__label">PRICE</span>
-          <span>{{ cv.price | money }}</span>
-        </div>
-      {% endif %}
+        {% if cv.compare_at_price > cv.price %}
+          <div class="pinfo__price-row">
+            <span class="pinfo__label">PRICE</span>
+            <span class="pinfo__compare">{{ cv.compare_at_price | money }}</span>
+          </div>
+          <div class="pinfo__price-row">
+            <span class="pinfo__label">SALE</span>
+            <span class="pinfo__sale">{{ cv.price | money }}</span>
+          </div>
+        {% else %}
+          <div class="pinfo__price-row">
+            <span class="pinfo__label">PRICE</span>
+            <span>{{ cv.price | money }}</span>
+          </div>
+        {% endif %}
+      {% endunless %}
     </div>
 
     <form action="/cart/add" method="post" id="atc-form" data-atc-form>
@@ -53,10 +57,19 @@
             <span class="pinfo__label">{{ opt.name | upcase }}</span>
             <div class="variant__opts">
               {% for val in opt.values %}
+                {% assign val_available = false %}
+                {% for v in product.variants %}
+                  {% if v.available %}
+                    {% if opt.position == 1 and v.option1 == val %}{% assign val_available = true %}{% endif %}
+                    {% if opt.position == 2 and v.option2 == val %}{% assign val_available = true %}{% endif %}
+                    {% if opt.position == 3 and v.option3 == val %}{% assign val_available = true %}{% endif %}
+                  {% endif %}
+                {% endfor %}
                 <button type="button"
-                  class="vbtn {% if opt.selected_value == val %}sel{% endif %}"
+                  class="vbtn{% unless val_available %} vbtn--sold-out{% endunless %}"
                   data-group="{{ opt.name }}"
-                  data-val="{{ val }}">{{ val }}</button>
+                  data-val="{{ val }}"
+                  {% unless val_available %}disabled{% endunless %}>{{ val }}</button>
               {% endfor %}
             </div>
           </div>

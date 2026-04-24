@@ -21,7 +21,6 @@
     <p class="pcard__name">{{ product.title }}</p>
     <div class="pcard__price">
       {% if sold_out %}
-        <span class="pcard__price-strike">{{ product.price | money }}</span>
         <span class="pcard__sold-out">SOLD OUT</span>
       {% elsif on_sale %}
         <span class="pcard__compare">{{ product.compare_at_price | money }}</span>

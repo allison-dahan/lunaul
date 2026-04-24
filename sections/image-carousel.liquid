@@ -46,7 +46,6 @@
   const slides = wrap.querySelectorAll('.slide');
   const dots   = wrap.querySelectorAll('.dot');
   let current  = 0;
-  let timer;
 
   function goTo(index) {
     slides[current].classList.remove('active');
@@ -58,24 +57,16 @@
 
   dots.forEach(dot => {
     dot.addEventListener('click', () => {
-      clearInterval(timer);
       goTo(parseInt(dot.dataset.index));
-      startAuto();
     });
   });
-
-  function startAuto() {
-    timer = setInterval(() => goTo(current + 1), 3000);
-  }
 
   let startX = 0;
   wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
   wrap.addEventListener('touchend', e => {
     const diff = startX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) { clearInterval(timer); goTo(current + (diff > 0 ? 1 : -1)); startAuto(); }
+    if (Math.abs(diff) > 40) { goTo(current + (diff > 0 ? 1 : -1)); }
   }, { passive: true });
-
-  if (slides.length > 1) startAuto();
 })();
   </script>
 
@@ -83,12 +74,33 @@
 
 <style>
 .carousel-wrap { position: relative; width: 100%; user-select: none; }
-.carousel { position: relative; width: 100%; overflow: hidden; }
-.slide { display: none; width: 100%; }
-.slide.active { display: block; }
-.slide img { width: 100%; height: auto; display: block; }
-.slide__caption { text-align: center; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; padding: 10px 0 4px; }
-.dots { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 14px 0 4px; }
+.carousel { position: relative; width: 100%; overflow: hidden; font-size: 0; line-height: 0; }
+.slide { display: none; width: 100%; font-size: 0; line-height: 0; }
+.slide.active { display: block; font-size: 0; line-height: 0; }
+
+/* Desktop: image natural size, full width */
+.slide img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Mobile: force full viewport height, crop to fill */
+@media (max-width: 768px) {
+  .slide.active {
+    height: 100svh;
+    overflow: hidden;
+  }
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+}
+
+.slide__caption { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #999; padding: 10px 0 4px; text-align: center; line-height: 1.4; }
+.dots { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 0 4px; }
 .dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #ccc; background: transparent; cursor: pointer; padding: 0; transition: background 0.2s, border-color 0.2s; }
 .dot.active { background: #000; border-color: #000; }
 .dot:hover:not(.active) { border-color: #999; }

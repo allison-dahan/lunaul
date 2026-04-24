@@ -37,8 +37,9 @@
     if (!slides.length) return;
 
     var arr = Array.from(slides);
-    var speed = {{ section.settings.speed | default: 4000 }};
-    var current = 0;
+    var speed    = {{ section.settings.speed | default: 4000 }};
+    var duration = {{ section.settings.duration | default: 400 }};
+    var current  = 0;
 
     // show first slide instantly
     arr[0].style.left = '0px';
@@ -58,8 +59,8 @@
       void nextEl.offsetHeight;
 
       // slide both
-      currEl.style.transition = 'left 0.4s ease';
-      nextEl.style.transition = 'left 0.4s ease';
+      currEl.style.transition = 'left ' + duration + 'ms ease';
+      nextEl.style.transition = 'left ' + duration + 'ms ease';
       currEl.style.left = '-100%';
       nextEl.style.left = '0px';
 
@@ -83,7 +84,8 @@
     { "type": "checkbox", "id": "show",       "label": "Show",              "default": true },
     { "type": "color",    "id": "bg_color",   "label": "Background color",  "default": "#000000" },
     { "type": "color",    "id": "text_color", "label": "Text color",        "default": "#ffffff" },
-    { "type": "range",    "id": "speed",      "label": "Seconds per slide", "min": 2000, "max": 8000, "step": 500, "default": 4000 }
+    { "type": "range", "id": "speed",    "label": "Delay between slides (ms)", "min": 2000, "max": 8000, "step": 500, "default": 4000, "unit": "ms" },
+    { "type": "range", "id": "duration", "label": "Slide animation speed (ms)", "min": 100,  "max": 800,  "step": 50,  "default": 400,  "unit": "ms" }
   ],
   "blocks": [
     {
