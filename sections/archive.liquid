@@ -1,0 +1,81 @@
+<div class="archive-wrap">
+  {% for block in section.blocks %}
+    {% if block.type == 'image' and block.settings.image != blank %}
+      <a class="archive-item" href="{{ block.settings.link | default: '#' }}" {{ block.shopify_attributes }}>
+        {{
+          block.settings.image
+          | image_url: width: 1400
+          | image_tag:
+            loading: 'lazy',
+            alt: block.settings.image.alt | default: '',
+            widths: '600, 900, 1400',
+            sizes: '(max-width: 767px) 33vw, 50vw'
+        }}
+      </a>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<style>
+/* Desktop: 2 columns, no gaps, full bleed */
+.archive-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+.archive-item {
+  display: block;
+  overflow: hidden;
+}
+.archive-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.archive-item:hover img {
+  transform: scale(1.02);
+}
+
+/* Mobile: 3 columns, with gaps */
+@media (max-width: 767px) {
+  .archive-wrap {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .archive-item img {
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Archive",
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "url",          "id": "link",  "label": "Link (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Archive",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    }
+  ]
+}
+{% endschema %}
