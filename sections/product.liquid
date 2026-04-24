@@ -16,71 +16,96 @@
           </div>
         {% endfor %}
       </div>
-      <button class="pgallery__arrow pgallery__arrow--prev" id="galleryPrev"></button>
-      <button class="pgallery__arrow pgallery__arrow--next" id="galleryNext"></button>
+      <button class="pgallery__arrow pgallery__arrow--prev" id="galleryPrev">&#8249;</button>
+      <button class="pgallery__arrow pgallery__arrow--next" id="galleryNext">&#8250;</button>
     </div>
   </div>
 
   <!-- INFO PANEL -->
   <div class="pinfo">
-    {% if product.vendor != blank %}<p class="pinfo__vendor">{{ product.vendor }}</p>{% endif %}
+
     <h1 class="pinfo__title">{{ product.title }}</h1>
-    <div class="pinfo__price">
+
+    <div class="pinfo__pricing">
       {% if cv.compare_at_price > cv.price %}
-        <s class="pinfo__compare">{{ cv.compare_at_price | money }}</s>
-        <span class="pinfo__sale">{{ cv.price | money }}</span>
+        <div class="pinfo__price-row">
+          <span class="pinfo__label">PRICE</span>
+          <span class="pinfo__compare">{{ cv.compare_at_price | money }}</span>
+        </div>
+        <div class="pinfo__price-row">
+          <span class="pinfo__label">SALE</span>
+          <span class="pinfo__sale">{{ cv.price | money }}</span>
+        </div>
       {% else %}
-        <span>{{ cv.price | money }}</span>
+        <div class="pinfo__price-row">
+          <span class="pinfo__label">PRICE</span>
+          <span>{{ cv.price | money }}</span>
+        </div>
       {% endif %}
     </div>
 
-    <form action="/cart/add" method="post" data-atc-form>
+    <form action="/cart/add" method="post" id="atc-form" data-atc-form>
       <input type="hidden" name="id" value="{{ cv.id }}" id="variantId">
+
       {% unless product.has_only_default_variant %}
-        <div class="variants">
-          {% for opt in product.options_with_values %}
-            <div>
-              <p class="variant__label">{{ opt.name | upcase }}</p>
-              <div class="variant__opts">
-                {% for val in opt.values %}
-                  <button type="button" class="vbtn {% if opt.selected_value == val %}sel{% endif %}" data-group="{{ opt.name }}" data-val="{{ val }}">{{ val }}</button>
-                {% endfor %}
-              </div>
+        {% for opt in product.options_with_values %}
+          <div class="pinfo__size-row">
+            <span class="pinfo__label">{{ opt.name | upcase }}</span>
+            <div class="variant__opts">
+              {% for val in opt.values %}
+                <button type="button"
+                  class="vbtn {% if opt.selected_value == val %}sel{% endif %}"
+                  data-group="{{ opt.name }}"
+                  data-val="{{ val }}">{{ val }}</button>
+              {% endfor %}
             </div>
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
       {% endunless %}
-      <button type="submit" class="btn-atc"{% unless cv.available %} disabled{% endunless %}>
-        {% if cv.available %}ADD TO CART{% else %}SOLD OUT{% endif %}
-      </button>
+
     </form>
 
-    {% if product.description != blank %}
+    <!-- Selected item bar — appears when a size is chosen -->
+    <div class="selected-bar" id="selectedBar" style="display:none;">
+      <span class="selected-bar__name" id="selectedName"></span>
+      <div class="selected-bar__right">
+        <div class="selected-bar__qty">
+          <button class="selected-bar__qty-btn" id="qtyUp">&#8593;</button>
+          <span class="selected-bar__qty-num" id="qtyNum">1</span>
+          <button class="selected-bar__qty-btn" id="qtyDown">&#8595;</button>
+        </div>
+        <button class="selected-bar__remove" id="selectedRemove">&#10005;</button>
+      </div>
+    </div>
+
     <div class="accordion">
+      {% if product.description != blank %}
       <div class="acc-item">
-        <button class="acc-trigger">
-          <span>DESCRIPTION</span><span class="acc-chevron">›</span>
-        </button>
+        <button class="acc-trigger"><span>DESCRIPTION</span><span class="acc-chevron">&#8250;</span></button>
         <div class="acc-body">{{ product.description }}</div>
       </div>
+      {% endif %}
       {% if section.settings.size_text != blank %}
       <div class="acc-item">
-        <button class="acc-trigger">
-          <span>SIZE</span><span class="acc-chevron">›</span>
-        </button>
+        <button class="acc-trigger"><span>SIZE</span><span class="acc-chevron">&#8250;</span></button>
         <div class="acc-body">{{ section.settings.size_text }}</div>
       </div>
       {% endif %}
       {% if section.settings.shipping_text != blank %}
       <div class="acc-item">
-        <button class="acc-trigger">
-          <span>SHIPPING &amp; RETURN</span><span class="acc-chevron">›</span>
-        </button>
+        <button class="acc-trigger"><span>SHIPPING &amp; RETURN</span><span class="acc-chevron">&#8250;</span></button>
         <div class="acc-body">{{ section.settings.shipping_text }}</div>
       </div>
       {% endif %}
     </div>
-    {% endif %}
+
+    <div class="pinfo__buttons">
+      <a href="/checkout" class="btn-buy-now">BUY NOW</a>
+      <button type="submit" form="atc-form" class="btn-add-cart"{% unless cv.available %} disabled{% endunless %}>
+        {% if cv.available %}ADD CART{% else %}SOLD OUT{% endif %}
+      </button>
+    </div>
+
   </div>
 </div>
 <!-- Lightbox -->
@@ -142,6 +167,58 @@ function closeLightbox() {
 
   goTo(0);
 })();
+
+// Selected size bar
+const selectedBar    = document.getElementById('selectedBar');
+const selectedName   = document.getElementById('selectedName');
+const qtyNum         = document.getElementById('qtyNum');
+const qtyUp          = document.getElementById('qtyUp');
+const qtyDown        = document.getElementById('qtyDown');
+const selectedRemove = document.getElementById('selectedRemove');
+const qtyInput       = document.querySelector('[name="quantity"]') || (() => {
+  const i = document.createElement('input');
+  i.type = 'hidden'; i.name = 'quantity'; i.value = '1';
+  document.querySelector('[data-atc-form]')?.appendChild(i);
+  return i;
+})();
+
+let qty = 1;
+
+function showBar(label) {
+  selectedName.textContent = '{{ product.title }}' + (label ? ' - ' + label : '');
+  selectedBar.style.display = 'flex';
+  qty = 1;
+  qtyNum.textContent = qty;
+  if (qtyInput) qtyInput.value = qty;
+}
+
+function hideBar() {
+  selectedBar.style.display = 'none';
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('sel'));
+}
+
+document.querySelectorAll('.vbtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.group;
+    document.querySelectorAll(`.vbtn[data-group="${group}"]`).forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    showBar(btn.dataset.val);
+  });
+});
+
+qtyUp?.addEventListener('click', () => {
+  qty = Math.min(qty + 1, 99);
+  qtyNum.textContent = qty;
+  if (qtyInput) qtyInput.value = qty;
+});
+
+qtyDown?.addEventListener('click', () => {
+  qty = Math.max(qty - 1, 1);
+  qtyNum.textContent = qty;
+  if (qtyInput) qtyInput.value = qty;
+});
+
+selectedRemove?.addEventListener('click', hideBar);
 </script>
 
 {% schema %}

@@ -71,6 +71,11 @@
         {% endif %}
       </li>
     {% endfor %}
+    <li>
+      <button class="sidebar-nav__link sidebar-nav__cart-btn" id="sidebarCartBtn">
+        CART{% if cart.item_count > 0 %} ({{ cart.item_count }}){% endif %}
+      </button>
+    </li>
   </ul>
   <div class="sidebar-nav__foot">
     {% if customer %}
@@ -80,7 +85,6 @@
       <a href="/account/login">LOGIN</a>
       <a href="/account/register">REGISTER</a>
     {% endif %}
-    <button id="sidebarCartBtn">CART ({{ cart.item_count }})</button>
   </div>
 </nav>
 
@@ -153,6 +157,9 @@ body.sidebar-open .site-header {
   transition: opacity 0.2s;
 }
 .sidebar-nav__link:hover { opacity: 0.45; }
+.sidebar-nav__cart-btn {
+  background: none; cursor: pointer; font-family: inherit; text-align: left; width: 100%;
+}
 
 li:has(.sidebar-nav__sub) > .sidebar-nav__link::after {
   content: ' ▶';
@@ -218,7 +225,7 @@ li:has(.sidebar-nav__sub) > .sidebar-nav__link::after {
 
   sidebarCart?.addEventListener('click', () => {
     closeSidebar();
-    document.getElementById('cartBtn')?.click();
+    if (typeof openCart === 'function') openCart();
   });
 })();
 </script>
