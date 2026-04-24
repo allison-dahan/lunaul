@@ -1,5 +1,7 @@
 {% assign on_sale = false %}
 {% if product.compare_at_price > product.price %}{% assign on_sale = true %}{% endif %}
+{% assign sold_out = false %}
+{% unless product.available %}{% assign sold_out = true %}{% endunless %}
 <a class="pcard" href="{{ product.url }}" data-fade>
   <div class="pcard__img-wrap">
     {% if product.featured_image %}
@@ -18,7 +20,10 @@
   <div class="pcard__info">
     <p class="pcard__name">{{ product.title }}</p>
     <div class="pcard__price">
-      {% if on_sale %}
+      {% if sold_out %}
+        <span class="pcard__price-strike">{{ product.price | money }}</span>
+        <span class="pcard__sold-out">SOLD OUT</span>
+      {% elsif on_sale %}
         <span class="pcard__compare">{{ product.compare_at_price | money }}</span>
         <span class="pcard__sale">{{ product.price | money }}</span>
       {% elsif product.price_varies %}

@@ -1,8 +1,99 @@
 {% if section.settings.show %}
-<div class="announcement-bar">
-  {% if section.settings.link != blank %}<a href="{{ section.settings.link }}">{% endif %}
-  {{ section.settings.text }}
-  {% if section.settings.link != blank %}</a>{% endif %}
+<div class="ann-bar">
+  <div class="ann-wrap" id="annWrap">
+    {% for block in section.blocks %}
+      {% if block.type == 'message' %}
+        <div class="ann-slide" {{ block.shopify_attributes }}>
+          {% if block.settings.link != blank %}<a href="{{ block.settings.link }}">{{ block.settings.text }}</a>
+          {% else %}{{ block.settings.text }}{% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
 </div>
+
+<style>
+.ann-bar {
+  background: {{ section.settings.bg_color }};
+  color: {{ section.settings.text_color }};
+  height: 36px;
+  overflow: hidden;
+}
+.ann-wrap { position: relative; height: 36px; }
+.ann-slide {
+  position: absolute;
+  width: 100%; height: 36px;
+  top: 0; left: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; white-space: nowrap;
+}
+.ann-slide a { color: inherit; text-decoration: none; }
+</style>
+
+<script>
+(function () {
+  function init() {
+    var slides = document.querySelectorAll('#annWrap .ann-slide');
+    if (!slides.length) return;
+
+    var arr = Array.from(slides);
+    var speed = {{ section.settings.speed | default: 4000 }};
+    var current = 0;
+
+    // show first slide instantly
+    arr[0].style.left = '0px';
+
+    if (arr.length < 2) return;
+
+    setInterval(function () {
+      var currEl = arr[current];
+      var nextIdx = (current + 1) % arr.length;
+      var nextEl = arr[nextIdx];
+
+      // park next to the right without animation
+      nextEl.style.transition = 'none';
+      nextEl.style.left = '100%';
+
+      // force browser to register the position before animating
+      void nextEl.offsetHeight;
+
+      // slide both
+      currEl.style.transition = 'left 0.4s ease';
+      nextEl.style.transition = 'left 0.4s ease';
+      currEl.style.left = '-100%';
+      nextEl.style.left = '0px';
+
+      current = nextIdx;
+    }, speed);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 50);
+  }
+})();
+</script>
 {% endif %}
-{% schema %}{"name":"Announcement Bar","settings":[{"type":"checkbox","id":"show","label":"Show","default":true},{"type":"text","id":"text","label":"Text","default":"FREE SHIPPING ON ORDERS OVER $100"},{"type":"url","id":"link","label":"Link"}],"presets":[{"name":"Announcement Bar"}]}{% endschema %}
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    { "type": "checkbox", "id": "show",       "label": "Show",              "default": true },
+    { "type": "color",    "id": "bg_color",   "label": "Background color",  "default": "#000000" },
+    { "type": "color",    "id": "text_color", "label": "Text color",        "default": "#ffffff" },
+    { "type": "range",    "id": "speed",      "label": "Seconds per slide", "min": 2000, "max": 8000, "step": 500, "default": 4000 }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "FREE SHIPPING ON ORDERS OVER $100" },
+        { "type": "url",  "id": "link", "label": "Link (optional)" }
+      ]
+    }
+  ]
+}
+{% endschema %}

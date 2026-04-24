@@ -99,8 +99,10 @@
       {% endif %}
     </div>
 
-    <div class="pinfo__buttons">
-      <a href="/checkout" class="btn-buy-now">BUY NOW</a>
+    <div class="pinfo__buttons{% unless cv.available %} pinfo__buttons--sold-out{% endunless %}">
+      {% if cv.available %}
+        <a href="/checkout" class="btn-buy-now">BUY NOW</a>
+      {% endif %}
       <button type="submit" form="atc-form" class="btn-add-cart"{% unless cv.available %} disabled{% endunless %}>
         {% if cv.available %}ADD CART{% else %}SOLD OUT{% endif %}
       </button>

@@ -18,12 +18,12 @@
 <!-- Column toggle buttons -->
 <div class="col-toggles">
   <div class="col-toggles__desktop">
-    <button class="col-btn active" data-cols="2">2</button>
-    <button class="col-btn" data-cols="4">4</button>
+    <button class="col-btn" data-cols="2">2</button>
+    <button class="col-btn active" data-cols="4">4</button>
   </div>
   <div class="col-toggles__mobile">
-    <button class="col-btn active" data-cols="1">1</button>
-    <button class="col-btn" data-cols="2">2</button>
+    <button class="col-btn active" data-cols="2">2</button>
+    <button class="col-btn" data-cols="4">4</button>
   </div>
 </div>
 
@@ -111,7 +111,7 @@
 /* Grid */
 .prod-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0;
 }
 .prod-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -131,6 +131,8 @@
 .pcard__price { font-size: 11px; font-weight: 700; color: #000; display: flex; gap: 8px; align-items: center; }
 .pcard__compare { color: #bbb; text-decoration: line-through; }
 .pcard__sale    { color: #b00; }
+.pcard__price-strike { color: #bbb; text-decoration: line-through; }
+.pcard__sold-out { font-weight: 700; color: #000; letter-spacing: 0.04em; text-transform: uppercase; }
 .pcard__badge {
   position: absolute; top: 10px; left: 10px;
   font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
@@ -165,7 +167,7 @@
   const isMobile = () => window.innerWidth < 768;
 
   // Set default cols based on viewport
-  let currentCols = isMobile() ? 1 : 2;
+  let currentCols = isMobile() ? 2 : 4;
   applyGrid(currentCols);
 
   // Wire up all toggle buttons
