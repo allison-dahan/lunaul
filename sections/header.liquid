@@ -89,6 +89,17 @@
 </nav>
 
 <style>
+:root {
+  --ann-h: 36px;
+  --header-h: 72px;
+}
+
+#page-push,
+#MainContent,
+.shopify-section {
+  overflow: visible !important;
+}
+
 /* ── Mobile: show MENU btn, hide desktop nav + hamburger + search + cart ── */
 @media (max-width: 960px) {
   .header__nav        { display: none !important; }
@@ -118,8 +129,18 @@
 #page-push.pushed {
   transform: translateX(260px);
 }
+
 .site-header {
+  position: sticky;
+  top: calc(var(--ann-h, 36px) + env(safe-area-inset-top));
+  z-index: 850;
+  background: #fff;
   transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+.header__inner {
+  height: var(--header-h, 72px);
+  background: #fff;
 }
 body.sidebar-open .site-header {
   transform: translateX(260px);

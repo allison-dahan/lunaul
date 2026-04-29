@@ -36,6 +36,7 @@ html { font-size: 13px; -webkit-font-smoothing: antialiased; }
   --dark-grey: #333;
   --border: #e5e5e5;       /* icyto uses very light borders */
   --header-h: 72px;
+  --ann-h: 0px;
 }
 
 body { font-family: var(--f); background: #fff; color: #000; }
@@ -736,8 +737,9 @@ ul   { list-style: none; }
   background: #000;
   border-color: #000;
 }
-/* Sticky header (not fixed) — no padding-top needed on sections */
-.site-header { position: sticky !important; top: 0 !important; }
+/* Sticky header — sits below announcement bar via --ann-h variable */
+.site-header { position: sticky !important; top: var(--ann-h, 0px) !important; }
+.site-header.hidden { transform: none !important; }
 /* Transparent header over homepage hero */
 .template-index .site-header:not(.scrolled) {
   background: rgba(255,255,255,0) !important;

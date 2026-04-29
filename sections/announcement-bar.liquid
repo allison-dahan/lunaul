@@ -4,8 +4,11 @@
     {% for block in section.blocks %}
       {% if block.type == 'message' %}
         <div class="ann-slide" {{ block.shopify_attributes }}>
-          {% if block.settings.link != blank %}<a href="{{ block.settings.link }}">{{ block.settings.text }}</a>
-          {% else %}{{ block.settings.text }}{% endif %}
+          {% if block.settings.link != blank %}
+            <a href="{{ block.settings.link }}">{{ block.settings.text }}</a>
+          {% else %}
+            {{ block.settings.text }}
+          {% endif %}
         </div>
       {% endif %}
     {% endfor %}
@@ -13,23 +16,50 @@
 </div>
 
 <style>
+:root {
+  --ann-h: 36px;
+}
+
+/* 🔥 fills the iPhone top area */
 .ann-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+
   background: {{ section.settings.bg_color }};
   color: {{ section.settings.text_color }};
-  height: 36px;
-  overflow: hidden;
+
   padding-top: env(safe-area-inset-top);
-  margin-top: calc(-1 * env(safe-area-inset-top));
 }
-.ann-wrap { position: relative; height: 36px; }
+
+/* actual visible bar */
+.ann-wrap {
+  position: relative;
+  height: var(--ann-h);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
 .ann-slide {
   position: absolute;
-  width: 100%; height: 36px;
-  top: 0; left: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; white-space: nowrap;
+  width: 100%;
+  height: var(--ann-h);
+  top: 0;
+  left: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
-.ann-slide a { color: inherit; text-decoration: none; }
+
+.ann-slide a {
+  color: inherit;
+  text-decoration: none;
+}
 </style>
 
 <script>
@@ -43,7 +73,6 @@
     var duration = {{ section.settings.duration | default: 400 }};
     var current  = 0;
 
-    // show first slide instantly
     arr[0].style.left = '0px';
 
     if (arr.length < 2) return;
@@ -53,16 +82,14 @@
       var nextIdx = (current + 1) % arr.length;
       var nextEl = arr[nextIdx];
 
-      // park next to the right without animation
       nextEl.style.transition = 'none';
       nextEl.style.left = '100%';
 
-      // force browser to register the position before animating
       void nextEl.offsetHeight;
 
-      // slide both
       currEl.style.transition = 'left ' + duration + 'ms ease';
       nextEl.style.transition = 'left ' + duration + 'ms ease';
+
       currEl.style.left = '-100%';
       nextEl.style.left = '0px';
 
@@ -83,11 +110,11 @@
 {
   "name": "Announcement Bar",
   "settings": [
-    { "type": "checkbox", "id": "show",       "label": "Show",              "default": true },
-    { "type": "color",    "id": "bg_color",   "label": "Background color",  "default": "#000000" },
-    { "type": "color",    "id": "text_color", "label": "Text color",        "default": "#ffffff" },
-    { "type": "range", "id": "speed",    "label": "Delay between slides (ms)", "min": 2000, "max": 8000, "step": 500, "default": 4000, "unit": "ms" },
-    { "type": "range", "id": "duration", "label": "Slide animation speed (ms)", "min": 100,  "max": 800,  "step": 50,  "default": 400,  "unit": "ms" }
+    { "type": "checkbox", "id": "show", "label": "Show", "default": true },
+    { "type": "color", "id": "bg_color", "label": "Background color", "default": "#000000" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" },
+    { "type": "range", "id": "speed", "label": "Delay between slides (ms)", "min": 2000, "max": 8000, "step": 500, "default": 4000 },
+    { "type": "range", "id": "duration", "label": "Slide animation speed (ms)", "min": 100, "max": 800, "step": 50, "default": 400 }
   ],
   "blocks": [
     {
@@ -95,7 +122,7 @@
       "name": "Message",
       "settings": [
         { "type": "text", "id": "text", "label": "Text", "default": "FREE SHIPPING ON ORDERS OVER $100" },
-        { "type": "url",  "id": "link", "label": "Link (optional)" }
+        { "type": "url", "id": "link", "label": "Link (optional)" }
       ]
     }
   ]
