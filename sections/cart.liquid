@@ -76,6 +76,19 @@
 </div>
 
 <style>
+/* Make cart page fill full viewport height with footer pinned to bottom */
+.template-cart #page-push {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.template-cart #main {
+  flex: 1;
+}
+.template-cart .site-footer {
+  border-top: none;
+}
+
 .cart-page {
   max-width: 1100px;
   margin: 0 auto;

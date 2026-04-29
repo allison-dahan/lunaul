@@ -18,6 +18,8 @@
   color: {{ section.settings.text_color }};
   height: 36px;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+  margin-top: calc(-1 * env(safe-area-inset-top));
 }
 .ann-wrap { position: relative; height: 36px; }
 .ann-slide {
