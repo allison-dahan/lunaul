@@ -165,8 +165,13 @@ body.sidebar-open .site-header {
   display: flex; flex-direction: column; gap: 4px;
   flex: 1;
 }
+.sidebar-nav__links li:first-child {
+  padding-top: 24px;
+}
 
-.sidebar-nav__link {
+.sidebar-nav__link,
+.sidebar-nav__link:visited,
+.sidebar-nav__link:active {
   display: block;
   padding: 8px 28px;
   font-size: 11px;
