@@ -58,6 +58,11 @@
             <div class="variant__opts">
               {% for val in opt.values %}
                 {% assign val_available = false %}
+                {% assign val_label = val %}
+                {% assign val_key = val | downcase | remove: " " %}
+                {% if val_key == "onesize" %}
+                  {% assign val_label = "OS" %}
+                {% endif %}
                 {% for v in product.variants %}
                   {% if v.available %}
                     {% if opt.position == 1 and v.option1 == val %}{% assign val_available = true %}{% endif %}
@@ -69,7 +74,8 @@
                   class="vbtn{% unless val_available %} vbtn--sold-out{% endunless %}"
                   data-group="{{ opt.name }}"
                   data-val="{{ val }}"
-                  {% unless val_available %}disabled{% endunless %}>{{ val }}</button>
+                  data-label="{{ val_label }}"
+                  {% unless val_available %}disabled{% endunless %}>{{ val_label }}</button>
               {% endfor %}
             </div>
           </div>
@@ -217,7 +223,7 @@ document.querySelectorAll('.vbtn').forEach(btn => {
     const group = btn.dataset.group;
     document.querySelectorAll(`.vbtn[data-group="${group}"]`).forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel');
-    showBar(btn.dataset.val);
+    showBar(btn.dataset.label || btn.dataset.val);
   });
 });
 
