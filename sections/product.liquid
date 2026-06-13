@@ -48,8 +48,9 @@
       {% endunless %}
     </div>
 
-    <form action="/cart/add" method="post" id="atc-form" data-atc-form>
+    <form action="/cart/add" method="post" id="atc-form" data-atc-form data-option-count="{{ product.options.size }}">
       <input type="hidden" name="id" value="{{ cv.id }}" id="variantId">
+      <input type="hidden" name="return_to" id="returnTo" value="">
 
       {% unless product.has_only_default_variant %}
         {% for opt in product.options_with_values %}
@@ -58,6 +59,11 @@
             <div class="variant__opts">
               {% for val in opt.values %}
                 {% assign val_available = false %}
+                {% assign val_label = val %}
+                {% assign val_key = val | downcase | remove: " " %}
+                {% if val_key == "onesize" %}
+                  {% assign val_label = "OS" %}
+                {% endif %}
                 {% for v in product.variants %}
                   {% if v.available %}
                     {% if opt.position == 1 and v.option1 == val %}{% assign val_available = true %}{% endif %}
@@ -68,8 +74,10 @@
                 <button type="button"
                   class="vbtn{% unless val_available %} vbtn--sold-out{% endunless %}"
                   data-group="{{ opt.name }}"
+                  data-position="{{ opt.position }}"
                   data-val="{{ val }}"
-                  {% unless val_available %}disabled{% endunless %}>{{ val }}</button>
+                  data-label="{{ val_label }}"
+                  {% unless val_available %}disabled{% endunless %}>{{ val_label }}</button>
               {% endfor %}
             </div>
           </div>
@@ -114,7 +122,7 @@
 
     <div class="pinfo__buttons{% unless cv.available %} pinfo__buttons--sold-out{% endunless %}">
       {% if cv.available %}
-        <a href="/checkout" class="btn-buy-now">BUY NOW</a>
+        <button type="submit" form="atc-form" class="btn-buy-now" data-buy-now>BUY NOW</button>
       {% endif %}
       <button type="submit" form="atc-form" class="btn-add-cart"{% unless cv.available %} disabled{% endunless %}>
         {% if cv.available %}ADD CART{% else %}SOLD OUT{% endif %}
@@ -129,6 +137,7 @@
   <img class="lightbox__img" id="lightboxImg" src="" alt="">
 </div>
 
+<script type="application/json" id="ProductVariantsJson">{{ product.variants | json }}</script>
 <script>
 // Lightbox
 const lightbox     = document.getElementById('lightbox');
@@ -197,6 +206,23 @@ const qtyInput       = document.querySelector('[name="quantity"]') || (() => {
   return i;
 })();
 
+const atcForm           = document.querySelector('[data-atc-form]');
+const returnToInput     = document.getElementById('returnTo');
+const variantIdInput    = document.getElementById('variantId');
+const optionCount       = parseInt(atcForm?.dataset.optionCount || '0', 10);
+const variantsData      = JSON.parse(document.getElementById('ProductVariantsJson')?.textContent || '[]');
+const selectedByPosition = {};
+
+function matchingVariant() {
+  if (Object.keys(selectedByPosition).length < optionCount) return null;
+  return variantsData.find(v => {
+    for (let i = 1; i <= optionCount; i++) {
+      if (selectedByPosition[i] !== v['option' + i]) return false;
+    }
+    return true;
+  }) || null;
+}
+
 let qty = 1;
 
 function showBar(label) {
@@ -217,8 +243,26 @@ document.querySelectorAll('.vbtn').forEach(btn => {
     const group = btn.dataset.group;
     document.querySelectorAll(`.vbtn[data-group="${group}"]`).forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel');
-    showBar(btn.dataset.val);
+    selectedByPosition[btn.dataset.position] = btn.dataset.val;
+
+    const match = matchingVariant();
+    if (match && variantIdInput) variantIdInput.value = match.id;
+
+    showBar(btn.dataset.label || btn.dataset.val);
   });
+});
+
+atcForm?.addEventListener('submit', (e) => {
+  if (optionCount > 0 && !matchingVariant()) {
+    e.preventDefault();
+    alert('Please select a size');
+    return;
+  }
+  if (returnToInput) {
+    returnToInput.value = e.submitter?.dataset.buyNow !== undefined
+      ? '/checkout'
+      : window.location.pathname + window.location.search;
+  }
 });
 
 qtyUp?.addEventListener('click', () => {
