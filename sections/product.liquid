@@ -255,6 +255,7 @@ document.querySelectorAll('.vbtn').forEach(btn => {
 atcForm?.addEventListener('submit', (e) => {
   if (optionCount > 0 && !matchingVariant()) {
     e.preventDefault();
+    e.stopPropagation();
     alert('Please select a size');
     return;
   }
