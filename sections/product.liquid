@@ -264,6 +264,14 @@ atcForm?.addEventListener('submit', (e) => {
       ? '/checkout'
       : window.location.pathname + window.location.search;
   }
+
+  if (e.submitter?.dataset.buyNow !== undefined) {
+    e.preventDefault();
+    e.stopPropagation();
+    fetch('/cart/add.js', { method: 'POST', body: new FormData(atcForm) })
+      .then(() => { window.location.href = '/checkout'; })
+      .catch(() => { window.location.href = '/checkout'; });
+  }
 });
 
 qtyUp?.addEventListener('click', () => {
